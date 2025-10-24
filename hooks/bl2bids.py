@@ -9,6 +9,11 @@ import nibabel as nib
 
 import utils
 
+def _resolve(p):
+    if isinstance(p, str):
+        return os.path.realpath(os.path.expandvars(os.path.expanduser(p)))
+    return p
+
 with open('config.json') as f:
     config = json.load(f)
 
@@ -19,19 +24,21 @@ if not "_inputs" in config:
 intended_paths = []
 
 #map the path specified by keys for each input
-multi_counts = {} #to handle mulltiple inputs
+multi_counts = {}  # to handle multiple inputs
 for id, input in enumerate(config["_inputs"]):
     input["_key2path"] = {}
     for key in input["keys"]:
-        if isinstance(config[key], list):
+        val = config[key]
+        if isinstance(val, list):
             input["_multi"] = True
             if key not in multi_counts:
                 multi_counts[key] = 0
-            input["_key2path"][key] = config[key][multi_counts[key]]
+            chosen = val[multi_counts[key]]
+            input["_key2path"][key] = _resolve(chosen)
             multi_counts[key] += 1
         else:
             input["_multi"] = False
-            input["_key2path"][key] = config[key]
+            input["_key2path"][key] = _resolve(val)
 
 #now construct bids structure!
 for id, input in enumerate(config["_inputs"]):
