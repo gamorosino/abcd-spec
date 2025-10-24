@@ -166,8 +166,13 @@ for id, input in enumerate(config["_inputs"]):
     elif input["datatype"] == utils.DWI:
         print("--> Modality: dwi")
 
-        bids_dwi_dir = f"bids/sub-{subject}/dwi"
+        # Build correct DWI path including session if available
+        if session:
+            bids_dwi_dir = f"bids/sub-{subject}/ses-{session}/dwi"
+        else:
+            bids_dwi_dir = f"bids/sub-{subject}/dwi"
         os.makedirs(bids_dwi_dir, exist_ok=True)
+
 
         # Find all DWI directories that might exist under input_dir
         dwi_dirs = []
